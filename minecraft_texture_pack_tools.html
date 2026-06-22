@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MC Texture Pack Tools</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;min-height:100vh;color:#e0e0e0;padding-bottom:90px}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+
+/* Hero */
+.hero{text-align:center;padding:50px 20px 30px;background:linear-gradient(180deg,rgba(0,150,255,.05) 0%,transparent 100%);border-bottom:1px solid rgba(0,150,255,.1);margin-bottom:20px}
+.hero h1{font-size:2.2rem;font-weight:800;margin-bottom:10px}
+.hero h1 span{background:linear-gradient(135deg,#0096ff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#666;font-size:1rem;max-width:500px;margin:0 auto;line-height:1.5}
+
+/* Version Status Bar */
+.version-status{background:rgba(0,150,255,.05);border:1px solid rgba(0,150,255,.1);border-radius:12px;padding:12px 20px;margin:0 auto 20px;max-width:600px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.version-status .status-text{color:#888;font-size:.8rem;display:flex;align-items:center;gap:8px}
+.version-status .status-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.version-status .status-dot.offline{background:#f87171;animation:none}
+.version-status .last-update{color:#555;font-size:.75rem}
+.version-status .update-btn{padding:6px 16px;font-size:.75rem;border:none;border-radius:8px;background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;font-weight:600;cursor:pointer;transition:all .3s}
+.version-status .update-btn:hover{transform:scale(1.05)}
+.version-status .update-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Bottom Tab Bar */
+.bottom-nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;background:rgba(30,30,35,.95);backdrop-filter:blur(20px);border-radius:24px;padding:8px 16px;gap:8px;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 24px;border-radius:16px;cursor:pointer;transition:all .3s;gap:4px;min-width:70px;border:none;background:transparent;color:#888}
+.nav-item:hover{color:#aaa}
+.nav-item.active{background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;box-shadow:0 4px 15px rgba(0,150,255,.3)}
+.nav-item svg{width:22px;height:22px;fill:currentColor}
+.nav-item span{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* Sections */
+.section{display:none;animation:fadeIn .4s ease}
+.section.active{display:block}
+.edition-content{display:none}
+.edition-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.section-header{text-align:center;margin-bottom:25px}
+.section-header h2{font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:6px}
+.section-header p{color:#555;font-size:.9rem}
+
+/* Edition Tabs */
+.edition-tabs{display:flex;justify-content:center;gap:0;margin:0 auto 25px;max-width:500px;background:rgba(255,255,255,.02);border-radius:12px;padding:5px;border:1px solid rgba(255,255,255,.05)}
+.tab-btn{flex:1;padding:12px 20px;font-size:.85rem;border:none;border-radius:8px;cursor:pointer;transition:all .3s;font-weight:600;text-transform:uppercase;letter-spacing:1px;background:transparent;color:#666}
+.tab-btn:hover{color:#aaa}
+.tab-btn.active{background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;box-shadow:0 4px 15px rgba(0,150,255,.3)}
+
+/* Sub Tool Tabs */
+.sub-tool-tabs{display:flex;justify-content:center;gap:10px;margin-bottom:20px}
+.sub-tool-btn{padding:12px 28px;font-size:.85rem;border:1px solid rgba(0,150,255,.2);border-radius:12px;cursor:pointer;transition:all .3s;font-weight:600;text-transform:uppercase;letter-spacing:1px;background:rgba(0,150,255,.05);color:#888}
+.sub-tool-btn:hover{border-color:rgba(0,150,255,.4);color:#aaa}
+.sub-tool-btn.active{background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;border-color:transparent;box-shadow:0 4px 15px rgba(0,150,255,.3)}
+.sub-tool-section{display:none}
+.sub-tool-section.active{display:block;animation:fadeIn .3s ease}
+
+/* Cards */
+.card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:25px;margin-bottom:15px;transition:border-color .3s}
+.card:hover{border-color:rgba(0,150,255,.15)}
+.card-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#0096ff;margin-bottom:15px;display:flex;align-items:center;gap:10px}
+.card-title::before{content:'';width:4px;height:18px;background:linear-gradient(180deg,#0096ff,#00d4ff);border-radius:2px}
+
+/* Inputs */
+.input-group{margin:18px 0}
+.input-group label{display:block;font-size:.8rem;font-weight:600;margin-bottom:8px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.input-group input[type="text"],.input-group textarea{width:100%;padding:14px;font-size:.9rem;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.3);color:#e0e0e0;outline:none;transition:all .3s;font-family:inherit}
+.input-group input[type="text"]:focus,.input-group textarea:focus{border-color:#0096ff;box-shadow:0 0 0 3px rgba(0,150,255,.1)}
+.input-group textarea{min-height:70px;resize:vertical}
+
+/* Upload */
+.upload-area{border:2px dashed rgba(0,150,255,.2);border-radius:16px;padding:40px 25px;text-align:center;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;background:rgba(0,150,255,.01)}
+.upload-area:hover,.upload-area.dragover{border-color:#0096ff;background:rgba(0,150,255,.03)}
+.upload-icon{font-size:2.5rem;margin-bottom:12px;display:block;opacity:.6}
+.upload-area p{font-size:.95rem;color:#666;margin-bottom:4px}
+.upload-area .hint{font-size:.8rem;color:#444}
+.upload-area input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+
+/* File Info */
+.file-info{display:none;background:rgba(255,255,255,.02);border-radius:12px;padding:15px;margin-top:12px;border:1px solid rgba(255,255,255,.05)}
+.file-info.show{display:block}
+.file-info p{margin:5px 0;color:#555;font-size:.85rem}
+.file-info span{color:#0096ff;font-weight:600}
+
+/* Preview */
+.pack-preview{display:none;text-align:center;margin:15px 0}
+.pack-preview.show{display:block}
+.pack-preview p{color:#444;font-size:.8rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.pack-preview img{max-width:130px;border-radius:12px;border:2px solid rgba(0,150,255,.2)}
+
+/* Version Selector */
+.version-selector{margin:20px 0}
+.version-selector label{display:block;font-size:.8rem;font-weight:600;margin-bottom:8px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.version-selector select{width:100%;padding:14px;font-size:.9rem;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.3);color:#e0e0e0;cursor:pointer;outline:none;transition:all .3s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+.version-selector select:focus{border-color:#0096ff;box-shadow:0 0 0 3px rgba(0,150,255,.1)}
+.version-selector select option{background:#0a0a0f;color:#e0e0e0}
+.version-selector select optgroup{background:#0a0a0f;color:#0096ff;font-weight:600}
+
+/* Buttons */
+.action-btn{width:100%;padding:16px;font-size:.95rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;margin-top:8px;transition:all .3s;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;box-shadow:0 4px 20px rgba(0,150,255,.2)}
+.action-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,150,255,.35)}
+.action-btn:active:not(:disabled){transform:translateY(0)}
+.action-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Progress */
+.progress-container{display:none;margin:20px 0}
+.progress-bar{width:100%;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#0096ff,#00d4ff);width:0%;transition:width .4s ease;border-radius:3px}
+.progress-text{text-align:center;margin-top:8px;font-size:.8rem;color:#0096ff;font-weight:600;letter-spacing:1px}
+
+/* Log */
+.log-area{background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin-top:15px;max-height:150px;overflow-y:auto;font-family:'SF Mono','Courier New',monospace;font-size:.75rem;display:none;border:1px solid rgba(255,255,255,.05)}
+.log-area.show{display:block}
+.log-entry{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03);line-height:1.4}
+.log-entry.success{color:#4ade80}
+.log-entry.error{color:#f87171}
+.log-entry.info{color:#60a5fa}
+.log-entry.warn{color:#fbbf24}
+
+/* Download Section */
+.download-section{display:none;text-align:center;padding:25px;background:rgba(0,150,255,.05);border-radius:16px;margin-top:15px;border:1px solid rgba(0,150,255,.15)}
+.download-section.show{display:block;animation:fadeIn .5s ease}
+.download-section h3{color:#0096ff;margin-bottom:8px;font-size:1.1rem;font-weight:700}
+.download-section p{color:#666;margin-bottom:15px;font-size:.9rem}
+.download-btn{padding:12px 30px;font-size:.9rem;border:none;border-radius:10px;background:linear-gradient(135deg,#0096ff,#0077cc);color:#fff;font-weight:700;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 20px rgba(0,150,255,.25)}
+.download-btn:hover{transform:scale(1.03);box-shadow:0 6px 25px rgba(0,150,255,.4)}
+
+/* Features */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:15px 0}
+.feature-card{background:rgba(255,255,255,.02);border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,.05);transition:all .3s}
+.feature-card:hover{border-color:rgba(0,150,255,.15);transform:translateY(-2px)}
+.feature-card h4{color:#0096ff;margin-bottom:6px;font-size:.9rem;font-weight:700}
+.feature-card p{color:#555;font-size:.8rem;line-height:1.5}
+
+/* Code Preview */
+.code-preview{background:rgba(0,0,0,.4);border-radius:12px;padding:15px;margin-top:15px;border:1px solid rgba(255,255,255,.05);font-family:'SF Mono','Courier New',monospace;font-size:.75rem;color:#aaa;overflow-x:auto;white-space:pre-wrap;word-break:break-all;display:none}
+.code-preview.show{display:block}
+
+/* Reviews */
+.review-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:20px;margin-bottom:15px;transition:all .3s}
+.review-card:hover{border-color:rgba(0,150,255,.15)}
+.review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.review-user{display:flex;align-items:center;gap:12px}
+.review-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0096ff,#00d4ff);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:#fff}
+.review-name{font-weight:600;color:#fff;font-size:.95rem}
+.review-time{color:#555;font-size:.75rem}
+.review-stars{color:#fbbf24;font-size:1rem;letter-spacing:2px}
+.review-text{color:#aaa;font-size:.9rem;line-height:1.6;margin-top:8px}
+.review-form{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:25px;margin-bottom:25px}
+.star-rating{display:flex;gap:8px;margin:10px 0;cursor:pointer}
+.star-rating .star{font-size:1.8rem;color:#333;transition:all .2s}
+.star-rating .star:hover,.star-rating .star.active{color:#fbbf24;transform:scale(1.1)}
+.reviews-list{max-height:600px;overflow-y:auto;padding-right:5px}
+.no-reviews{text-align:center;padding:50px 20px;color:#555}
+.no-reviews svg{width:60px;height:60px;fill:#333;margin-bottom:15px}
+
+/* Footer */
+footer{text-align:center;padding:30px 20px;color:#333;margin-top:30px;border-top:1px solid rgba(255,255,255,.03)}
+footer p{font-size:.8rem;margin:4px 0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:#222;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#0096ff}
+
+/* Custom Searchable Dropdown */
+.custom-dropdown{position:relative;width:100%}
+.custom-dropdown-trigger{width:100%;padding:14px;font-size:.9rem;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.3);color:#e0e0e0;cursor:pointer;outline:none;transition:all .3s;display:flex;justify-content:space-between;align-items:center}
+.custom-dropdown-trigger:hover{border-color:rgba(0,150,255,.3)}
+.custom-dropdown-trigger.open{border-color:#0096ff;box-shadow:0 0 0 3px rgba(0,150,255,.1)}
+.custom-dropdown-trigger .trigger-text{color:#888}
+.custom-dropdown-trigger .trigger-text.selected{color:#e0e0e0}
+.custom-dropdown-trigger svg{fill:#666;width:14px;height:14px;transition:transform .3s}
+.custom-dropdown-trigger.open svg{transform:rotate(180deg)}
+.custom-dropdown-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#1a1a20;border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.8);z-index:100;max-height:320px;display:none;overflow:hidden;animation:dropdownIn .2s ease}
+.custom-dropdown-menu.open{display:block}
+@keyframes dropdownIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.dropdown-search{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.dropdown-search svg{fill:#555;width:16px;height:16px;flex-shrink:0}
+.dropdown-search input{width:100%;background:transparent;border:none;color:#e0e0e0;font-size:.9rem;outline:none;font-family:inherit}
+.dropdown-search input::placeholder{color:#444}
+.dropdown-list{max-height:260px;overflow-y:auto;padding:6px}
+.dropdown-item{padding:12px 14px;border-radius:10px;cursor:pointer;transition:all .15s;color:#aaa;font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.dropdown-item:hover{background:rgba(0,150,255,.08);color:#fff}
+.dropdown-item.selected{background:rgba(0,150,255,.15);color:#0096ff;font-weight:600}
+.dropdown-item .radio{width:18px;height:18px;border:2px solid #444;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.dropdown-item.selected .radio{border-color:#0096ff;background:#0096ff}
+.dropdown-item.selected .radio::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%;display:block}
+.dropdown-empty{padding:30px;text-align:center;color:#444;font-size:.85rem}
+
+
+/* Loading Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile */
+@media(max-width:768px){
+.hero h1{font-size:1.8rem}
+.card{padding:18px}
+.upload-area{padding:30px 20px}
+.sub-tool-tabs{flex-direction:column}
+.sub-tool-btn{width:100%}
+.bottom-nav{padding:6px 10px;gap:4px}
+.nav-item{padding:8px 16px;min-width:60px}
+.nav-item span{font-size:.55rem}
+.version-status{flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="hero"><h1>Texture Pack <span>Tools</span></h1><p>Create and update your Minecraft texture packs for Java and Bedrock Edition</p></div>
+
+<div class="container">
+
+<!-- Version Status Bar -->
+<div class="version-status" id="version-status">
+<div class="status-text">
+<span class="status-dot" id="status-dot"></span>
+<span id="status-text">Checking for updates...</span>
+</div>
+<div class="last-update" id="last-update">--</div>
+<button class="update-btn" id="update-btn" onclick="checkForUpdates()">Check Updates</button>
+</div>
+
+<!-- ==================== HOME SECTION ==================== -->
+<div id="home-section" class="section active">
+
+<div class="edition-tabs">
+<button class="tab-btn java active" onclick="switchEdition('java')">Java Tools</button>
+<button class="tab-btn bedrock" onclick="switchEdition('bedrock')">Bedrock Tools</button>
+</div>
+
+<!-- JAVA EDITION -->
+<div id="java-edition" class="edition-content active">
+<div class="section-header"><h2>Java Edition Tools</h2><p>Create pack.mcmeta or update existing texture packs</p></div>
+<div class="sub-tool-tabs">
+<button class="sub-tool-btn active" id="java-creator-tab" onclick="switchSubTool('java','creator')">Pack.mcmeta Creator</button>
+<button class="sub-tool-btn" id="java-updater-tab" onclick="switchSubTool('java','updater')">Texture Pack Updater</button>
+</div>
+
+<div id="java-creator" class="sub-tool-section active">
+<div class="features">
+<div class="feature-card"><h4>Instant Creation</h4><p>Generate pack.mcmeta file instantly with your selected version and description.</p></div>
+<div class="feature-card"><h4>All Versions</h4><p>Supports every Minecraft version from 1.6.1 to the latest 1.26.x releases.</p></div>
+<div class="feature-card"><h4>Ready to Use</h4><p>Download the file and place it directly in your texture pack folder.</p></div>
+</div>
+<div class="card">
+<div class="card-title">Pack Details</div>
+<div class="version-selector">
+<label for="java-creator-version">Select Minecraft Version</label>
+<select id="java-creator-version">
+<option value="" disabled selected>-- Loading Versions --</option>
+</select>
+</div>
+<div class="input-group">
+<label for="java-pack-desc">Pack Description</label>
+<textarea id="java-pack-desc" placeholder="Enter your texture pack description..."></textarea>
+</div>
+<button class="action-btn" id="java-create-btn" onclick="createJavaMcmeta()" disabled>Generate pack.mcmeta</button>
+<div class="code-preview" id="java-code-preview"></div>
+<div class="download-section" id="java-creator-download">
+<h3>pack.mcmeta Created!</h3>
+<p>Your pack.mcmeta file is ready to download.</p>
+<button class="download-btn" onclick="downloadJavaMcmeta()">Download pack.mcmeta</button>
+</div>
+</div>
+</div>
+
+<div id="java-updater" class="sub-tool-section">
+<div class="features">
+<div class="feature-card"><h4>Pack Format Update</h4><p>Automatically updates pack format number based on selected version.</p></div>
+<div class="feature-card"><h4>mcmeta Fix</h4><p>Updates pack.mcmeta file to correct format for target version.</p></div>
+<div class="feature-card"><h4>Structure Maintain</h4><p>All textures and folder structures remain exactly the same.</p></div>
+</div>
+<div class="card">
+<div class="card-title">Upload Pack</div>
+<div class="upload-area" id="java-upload-area" ondragover="handleDragOver(event,'java')" ondragleave="handleDragLeave(event,'java')" ondrop="handleDrop(event,'java')">
+<input type="file" id="java-file" accept=".zip" onchange="handleFileSelect(event,'java')">
+<span class="upload-icon">&#128193;</span>
+<p><strong>Click here</strong> or <strong>drag & drop</strong> your Java texture pack</p>
+<p class="hint">.zip files only</p>
+</div>
+<div class="file-info" id="java-file-info">
+<p>File Name: <span id="java-filename">-</span></p>
+<p>File Size: <span id="java-filesize">-</span></p>
+<p>File Type: <span id="java-filetype">-</span></p>
+</div>
+<div class="pack-preview" id="java-preview">
+<p>Pack Icon Preview</p>
+<img id="java-preview-img" src="" alt="Pack Preview">
+</div>
+</div>
+<div class="card">
+<div class="card-title">Select Version</div>
+<div class="version-selector">
+<label for="java-updater-version">Target Minecraft Version</label>
+<select id="java-updater-version">
+<option value="" disabled selected>-- Loading Versions --</option>
+</select>
+</div>
+<button class="action-btn" id="java-update-btn" onclick="updatePack('java')" disabled>Update Pack</button>
+<div class="progress-container" id="java-progress">
+<div class="progress-bar"><div class="progress-fill" id="java-progress-fill"></div></div>
+<div class="progress-text" id="java-progress-text">0%</div>
+</div>
+<div class="log-area" id="java-log"></div>
+<div class="download-section" id="java-updater-download">
+<h3>Pack Successfully Updated!</h3>
+<p>Your updated texture pack is ready to download.</p>
+<button class="download-btn" id="java-download-btn" onclick="downloadPack('java')">Download Updated Pack</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- BEDROCK EDITION -->
+<div id="bedrock-edition" class="edition-content">
+<div class="section-header"><h2>Bedrock Edition Tools</h2><p>Create manifest.json or update existing texture packs</p></div>
+<div class="sub-tool-tabs">
+<button class="sub-tool-btn active" id="bedrock-creator-tab" onclick="switchSubTool('bedrock','creator')">Manifest.json Creator</button>
+<button class="sub-tool-btn" id="bedrock-updater-tab" onclick="switchSubTool('bedrock','updater')">Texture Pack Updater</button>
+</div>
+
+<div id="bedrock-creator" class="sub-tool-section active">
+<div class="features">
+<div class="feature-card"><h4>Instant Creation</h4><p>Generate manifest.json file instantly with your selected version, name and description.</p></div>
+<div class="feature-card"><h4>All Versions</h4><p>Supports every Bedrock version from 1.10.0 to the latest 1.26.x releases.</p></div>
+<div class="feature-card"><h4>Ready to Use</h4><p>Download the file and place it directly in your Bedrock texture pack folder.</p></div>
+</div>
+<div class="card">
+<div class="card-title">Pack Details</div>
+<div class="version-selector">
+<label for="bedrock-creator-version">Select Minecraft Bedrock Version</label>
+<select id="bedrock-creator-version">
+<option value="" disabled selected>-- Loading Versions --</option>
+</select>
+</div>
+<div class="input-group">
+<label for="bedrock-pack-name">Pack Name</label>
+<input type="text" id="bedrock-pack-name" placeholder="Enter your texture pack name...">
+</div>
+<div class="input-group">
+<label for="bedrock-pack-desc">Pack Description</label>
+<textarea id="bedrock-pack-desc" placeholder="Enter your texture pack description..."></textarea>
+</div>
+<button class="action-btn" id="bedrock-create-btn" onclick="createBedrockManifest()" disabled>Generate manifest.json</button>
+<div class="code-preview" id="bedrock-code-preview"></div>
+<div class="download-section" id="bedrock-creator-download">
+<h3>manifest.json Created!</h3>
+<p>Your manifest.json file is ready to download.</p>
+<button class="download-btn" onclick="downloadBedrockManifest()">Download manifest.json</button>
+</div>
+</div>
+</div>
+
+<div id="bedrock-updater" class="sub-tool-section">
+<div class="features">
+<div class="feature-card"><h4>manifest.json Update</h4><p>Updates manifest.json for the selected Bedrock version.</p></div>
+<div class="feature-card"><h4>Format Version Fix</h4><p>Corrects format version and min_engine_version fields.</p></div>
+<div class="feature-card"><h4>Mobile Ready</h4><p>Optimized output for Pocket Edition.</p></div>
+</div>
+<div class="card">
+<div class="card-title">Upload Pack</div>
+<div class="upload-area" id="bedrock-upload-area" ondragover="handleDragOver(event,'bedrock')" ondragleave="handleDragLeave(event,'bedrock')" ondrop="handleDrop(event,'bedrock')">
+<input type="file" id="bedrock-file" accept=".zip,.mcpack" onchange="handleFileSelect(event,'bedrock')">
+<span class="upload-icon">&#128193;</span>
+<p><strong>Click here</strong> or <strong>drag & drop</strong> your Bedrock texture pack</p>
+<p class="hint">.zip or .mcpack files</p>
+</div>
+<div class="file-info" id="bedrock-file-info">
+<p>File Name: <span id="bedrock-filename">-</span></p>
+<p>File Size: <span id="bedrock-filesize">-</span></p>
+<p>File Type: <span id="bedrock-filetype">-</span></p>
+</div>
+<div class="pack-preview" id="bedrock-preview">
+<p>Pack Icon Preview</p>
+<img id="bedrock-preview-img" src="" alt="Pack Preview">
+</div>
+</div>
+<div class="card">
+<div class="card-title">Select Version</div>
+<div class="version-selector">
+<label for="bedrock-updater-version">Target Minecraft Bedrock Version</label>
+<select id="bedrock-updater-version">
+<option value="" disabled selected>-- Loading Versions --</option>
+</select>
+</div>
+<button class="action-btn" id="bedrock-update-btn" onclick="updatePack('bedrock')" disabled>Update Pack</button>
+<div class="progress-container" id="bedrock-progress">
+<div class="progress-bar"><div class="progress-fill" id="bedrock-progress-fill"></div></div>
+<div class="progress-text" id="bedrock-progress-text">0%</div>
+</div>
+<div class="log-area" id="bedrock-log"></div>
+<div class="download-section" id="bedrock-updater-download">
+<h3>Pack Successfully Updated!</h3>
+<p>Your updated Bedrock texture pack is ready to download.</p>
+<button class="download-btn" id="bedrock-download-btn" onclick="downloadPack('bedrock')">Download Updated Pack (.mcpack)</button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ==================== REVIEWS SECTION ==================== -->
+<div id="reviews-section" class="section">
+<div class="section-header"><h2>Reviews</h2><p>See what others are saying about this tool</p></div>
+<div class="review-form">
+<div class="card-title">Write a Review</div>
+<div class="input-group">
+<label>Your Name</label>
+<input type="text" id="review-name" placeholder="Enter your name...">
+</div>
+<div class="input-group">
+<label>Rating</label>
+<div class="star-rating" id="star-rating">
+<span class="star" data-value="1">&#9733;</span>
+<span class="star" data-value="2">&#9733;</span>
+<span class="star" data-value="3">&#9733;</span>
+<span class="star" data-value="4">&#9733;</span>
+<span class="star" data-value="5">&#9733;</span>
+</div>
+</div>
+<div class="input-group">
+<label>Your Review</label>
+<textarea id="review-text" placeholder="Share your experience..."></textarea>
+</div>
+<button class="action-btn" onclick="submitReview()">Submit Review</button>
+</div>
+<div class="reviews-list" id="reviews-list"></div>
+</div>
+
+<!-- ==================== MORE SECTION ==================== -->
+<div id="more-section" class="section">
+<div class="section-header"><h2>More</h2><p>Additional options and information</p></div>
+<div class="features">
+<div class="feature-card"><h4>About</h4><p>MC Texture Pack Tools is a free web app for Minecraft players to create and manage texture packs.</p></div>
+<div class="feature-card"><h4>Version</h4><p>Current version: 2.0. Supports all Minecraft versions up to 1.26.x.</p></div>
+<div class="feature-card"><h4>Contact</h4><p>Found a bug or have a suggestion? Let us know through the community.</p></div>
+<div class="feature-card"><h4>Privacy</h4><p>All file processing happens in your browser. No data is uploaded to any server.</p></div>
+</div>
+</div>
+
+<footer><p>Made for the Minecraft Community</p><p>Java & Bedrock Edition Support | All versions up to 1.26.x</p></footer>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+<button class="nav-item active" onclick="switchMainTab('home')" id="nav-home">
+<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+<span>Home</span>
+</button>
+<button class="nav-item" onclick="switchMainTab('reviews')" id="nav-reviews">
+<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+<span>Reviews</span>
+</button>
+<button class="nav-item" onclick="switchMainTab('more')" id="nav-more">
+<svg viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+<span>More</span>
+</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script>
+// ==================== VERSION CONFIGURATION ====================
+// CHANGE THIS URL to your own GitHub raw JSON URL!
+const VERSION_JSON_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/versions.json';
+// Fallback URL using a public gist (replace with yours)
+// const VERSION_JSON_URL = 'https://gist.githubusercontent.com/YOUR_GIST_ID/raw/versions.json';
+
+let versionData = null;
+let cachedVersions = null;
+
+// ==================== FALLBACK DATA (Offline Mode) ====================
+const FALLBACK_VERSIONS = {
+  last_updated: "2026-06-22T22:00:00Z",
+  source: "fallback",
+  java_versions: [
+    {version:"1.26.2",pack_format:101.1,label:"1.26.2 (Pack Format 101.1)"},
+    {version:"1.26.1",pack_format:101.1,label:"1.26.1 (Pack Format 101.1)"},
+    {version:"1.26",pack_format:101.1,label:"1.26 (Pack Format 101.1)"},
+    {version:"1.26-pre",pack_format:101.0,label:"1.26 Pre-release (Pack Format 101.0)"},
+    {version:"1.21.11",pack_format:84,label:"1.21.11 (Pack Format 84)"},
+    {version:"1.21.10",pack_format:84,label:"1.21.10 (Pack Format 84)"},
+    {version:"1.21.9",pack_format:84,label:"1.21.9 (Pack Format 84)"},
+    {version:"1.21.8",pack_format:84,label:"1.21.8 (Pack Format 84)"},
+    {version:"1.21.7",pack_format:84,label:"1.21.7 (Pack Format 84)"},
+    {version:"1.21.6",pack_format:84,label:"1.21.6 (Pack Format 84)"},
+    {version:"1.21.5",pack_format:84,label:"1.21.5 (Pack Format 84)"},
+    {version:"1.21.4",pack_format:84,label:"1.21.4 (Pack Format 84)"},
+    {version:"1.21.3",pack_format:83,label:"1.21.3 (Pack Format 83)"},
+    {version:"1.21.2",pack_format:82,label:"1.21.2 (Pack Format 82)"},
+    {version:"1.21.1",pack_format:81,label:"1.21.1 (Pack Format 81)"},
+    {version:"1.21",pack_format:80,label:"1.21 (Pack Format 80)"},
+    {version:"1.20.6",pack_format:34,label:"1.20.6 (Pack Format 34)"},
+    {version:"1.20.5",pack_format:34,label:"1.20.5 (Pack Format 34)"},
+    {version:"1.20.4",pack_format:34,label:"1.20.4 (Pack Format 34)"},
+    {version:"1.20.3",pack_format:33,label:"1.20.3 (Pack Format 33)"},
+    {version:"1.20.2",pack_format:32,label:"1.20.2 (Pack Format 32)"},
+    {version:"1.20.1",pack_format:32,label:"1.20.1 (Pack Format 32)"},
+    {version:"1.20",pack_format:32,label:"1.20 (Pack Format 32)"},
+    {version:"1.19.4",pack_format:15,label:"1.19.4 (Pack Format 15)"},
+    {version:"1.19.3",pack_format:14,label:"1.19.3 (Pack Format 14)"},
+    {version:"1.19.2",pack_format:13,label:"1.19.2 (Pack Format 13)"},
+    {version:"1.19.1",pack_format:13,label:"1.19.1 (Pack Format 13)"},
+    {version:"1.19",pack_format:13,label:"1.19 (Pack Format 13)"},
+    {version:"1.18.2",pack_format:9,label:"1.18.2 (Pack Format 9)"},
+    {version:"1.18.1",pack_format:8,label:"1.18.1 (Pack Format 8)"},
+    {version:"1.18",pack_format:8,label:"1.18 (Pack Format 8)"},
+    {version:"1.17.1",pack_format:8,label:"1.17.1 (Pack Format 8)"},
+    {version:"1.17",pack_format:7,label:"1.17 (Pack Format 7)"},
+    {version:"1.16.5",pack_format:7,label:"1.16.5 (Pack Format 7)"},
+    {version:"1.16.4",pack_format:6,label:"1.16.2-1.16.4 (Pack Format 6)"},
+    {version:"1.16.1",pack_format:5,label:"1.15-1.16.1 (Pack Format 5)"},
+    {version:"1.14.4",pack_format:4,label:"1.13-1.14.4 (Pack Format 4)"},
+    {version:"1.12.2",pack_format:3,label:"1.11-1.12.2 (Pack Format 3)"},
+    {version:"1.10.2",pack_format:2,label:"1.9-1.10.2 (Pack Format 2)"},
+    {version:"1.8.9",pack_format:1,label:"1.6.1-1.8.9 (Pack Format 1)"}
+  ],
+  bedrock_versions: [
+    {version:"1.26.3",label:"1.26.3"},
+    {version:"1.26.2",label:"1.26.2"},
+    {version:"1.26.1",label:"1.26.1"},
+    {version:"1.26.0",label:"1.26.0"},
+    {version:"1.21.80",label:"1.21.80"},
+    {version:"1.21.70",label:"1.21.70"},
+    {version:"1.21.60",label:"1.21.60"},
+    {version:"1.21.50",label:"1.21.50 (The Garden Awakens)"},
+    {version:"1.21.40",label:"1.21.40"},
+    {version:"1.21.30",label:"1.21.30"},
+    {version:"1.21.20",label:"1.21.20"},
+    {version:"1.21.0",label:"1.21.0 (Tricky Trials)"},
+    {version:"1.20.80",label:"1.20.80"},
+    {version:"1.20.70",label:"1.20.70"},
+    {version:"1.20.60",label:"1.20.60"},
+    {version:"1.20.50",label:"1.20.50"},
+    {version:"1.20.30",label:"1.20.30"},
+    {version:"1.20.0",label:"1.20.0 (Trails & Tales)"},
+    {version:"1.19.80",label:"1.19.80"},
+    {version:"1.19.70",label:"1.19.70"},
+    {version:"1.19.60",label:"1.19.60"},
+    {version:"1.19.50",label:"1.19.50"},
+    {version:"1.19.40",label:"1.19.40"},
+    {version:"1.19.0",label:"1.19.0 (The Wild Update)"},
+    {version:"1.18.30",label:"1.18.30"},
+    {version:"1.18.10",label:"1.18.10"},
+    {version:"1.18.0",label:"1.18.0 (Caves & Cliffs Part 2)"},
+    {version:"1.17.40",label:"1.17.40"},
+    {version:"1.17.30",label:"1.17.30"},
+    {version:"1.17.10",label:"1.17.10"},
+    {version:"1.17.0",label:"1.17.0 (Caves & Cliffs Part 1)"},
+    {version:"1.16.220",label:"1.16.220 (Nether Update)"},
+    {version:"1.16.210",label:"1.16.210"},
+    {version:"1.16.201",label:"1.16.201"},
+    {version:"1.16.100",label:"1.16.100"},
+    {version:"1.16.0",label:"1.16.0"},
+    {version:"1.14.0",label:"1.14.0 (Village & Pillage)"},
+    {version:"1.13.0",label:"1.13.0"},
+    {version:"1.12.0",label:"1.12.0"},
+    {version:"1.11.0",label:"1.11.0"},
+    {version:"1.10.0",label:"1.10.0"}
+  ]
+};
+
+// ==================== FETCH VERSIONS FROM GITHUB ====================
+async function fetchVersions() {
+  const statusText = document.getElementById('status-text');
+  const statusDot = document.getElementById('status-dot');
+  const lastUpdate = document.getElementById('last-update');
+  const updateBtn = document.getElementById('update-btn');
+
+  updateBtn.disabled = true;
+  statusText.innerHTML = 'Checking for updates<span class="spinner"></span>';
+
+  try {
+    // Try to fetch from GitHub
+    const response = await fetch(VERSION_JSON_URL + '?t=' + Date.now(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    const data = await response.json();
+    versionData = data;
+
+    // Save to localStorage for offline use
+    localStorage.setItem('mc_version_cache', JSON.stringify({
+      data: data,
+      timestamp: Date.now()
+    }));
+
+    statusText.textContent = 'Versions up to date';
+    statusDot.classList.remove('offline');
+    statusDot.style.background = '#4ade80';
+    lastUpdate.textContent = 'Updated: ' + new Date(data.last_updated).toLocaleString();
+
+  } catch (error) {
+    console.log('Fetch failed, using fallback:', error);
+
+    // Try to use cached data
+    const cached = localStorage.getItem('mc_version_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      versionData = parsed.data;
+      statusText.textContent = 'Using cached versions';
+      lastUpdate.textContent = 'Cached: ' + new Date(parsed.timestamp).toLocaleString();
+    } else {
+      // Use hardcoded fallback
+      versionData = FALLBACK_VERSIONS;
+      statusText.textContent = 'Offline mode';
+      statusDot.classList.add('offline');
+      lastUpdate.textContent = 'Using built-in versions';
+    }
+  } finally {
+    updateBtn.disabled = false;
+    populateVersionDropdowns();
+  }
+}
+
+function populateVersionDropdowns() {
+  if (!versionData) return;
+
+  const javaVersions = versionData.java_versions || FALLBACK_VERSIONS.java_versions;
+  const bedrockVersions = versionData.bedrock_versions || FALLBACK_VERSIONS.bedrock_versions;
+
+  // Store version data for custom dropdowns
+  window._javaVersions = javaVersions;
+  window._bedrockVersions = bedrockVersions;
+
+  // Populate Java custom dropdowns (flat list, no groups)
+  renderCustomDropdown('java-creator', javaVersions, true);
+  renderCustomDropdown('java-updater', javaVersions, true);
+
+  // Populate Bedrock custom dropdowns
+  renderCustomDropdown('bedrock-creator', bedrockVersions, false);
+  renderCustomDropdown('bedrock-updater', bedrockVersions, false);
+}
+
+function renderCustomDropdown(dropdownId, versions, isJava) {
+  const list = document.getElementById(dropdownId + '-list');
+  if (!list) return;
+
+  let html = '';
+  versions.forEach(v => {
+    const value = isJava ? v.pack_format : v.version;
+    const label = isJava ? v.version : v.label;
+    html += `<div class="dropdown-item" data-value="${value}" onclick="selectDropdownItem('${dropdownId}', '${value}', '${label.replace(/'/g, "\'")}')">
+      <span>${label}</span>
+      <span class="radio"></span>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function toggleDropdown(dropdownId) {
+  const menu = document.getElementById(dropdownId + '-menu');
+  const trigger = document.querySelector('#' + dropdownId + '-dropdown .custom-dropdown-trigger');
+  const isOpen = menu.classList.contains('open');
+
+  // Close all dropdowns first
+  document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.custom-dropdown-trigger').forEach(t => t.classList.remove('open'));
+
+  if (!isOpen) {
+    menu.classList.add('open');
+    trigger.classList.add('open');
+    // Focus search input
+    setTimeout(() => {
+      const searchInput = menu.querySelector('.dropdown-search input');
+      if (searchInput) searchInput.focus();
+    }, 50);
+  }
+}
+
+function filterDropdown(dropdownId, query) {
+  const list = document.getElementById(dropdownId + '-list');
+  const items = list.querySelectorAll('.dropdown-item');
+  const lowerQuery = query.toLowerCase();
+  let visibleCount = 0;
+
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    if (text.includes(lowerQuery)) {
+      item.style.display = 'flex';
+      visibleCount++;
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  // Show empty message if no results
+  const existingEmpty = list.querySelector('.dropdown-empty');
+  if (existingEmpty) existingEmpty.remove();
+
+  if (visibleCount === 0) {
+    list.innerHTML += '<div class="dropdown-empty">No versions found</div>';
+  }
+}
+
+function selectDropdownItem(dropdownId, value, label) {
+  // Update hidden input
+  const hiddenInput = document.getElementById(dropdownId + '-version');
+  if (hiddenInput) hiddenInput.value = value;
+
+  // Update trigger text
+  const triggerText = document.getElementById(dropdownId + '-trigger-text');
+  if (triggerText) {
+    triggerText.textContent = label;
+    triggerText.classList.add('selected');
+  }
+
+  // Update selected state in list
+  const list = document.getElementById(dropdownId + '-list');
+  list.querySelectorAll('.dropdown-item').forEach(item => {
+    item.classList.toggle('selected', item.dataset.value === value);
+  });
+
+  // Close dropdown
+  const menu = document.getElementById(dropdownId + '-menu');
+  const trigger = document.querySelector('#' + dropdownId + '-dropdown .custom-dropdown-trigger');
+  menu.classList.remove('open');
+  trigger.classList.remove('open');
+
+  // Trigger change event for existing logic
+  const event = new Event('change');
+  if (hiddenInput) hiddenInput.dispatchEvent(event);
+
+  // Call the appropriate check function
+  if (dropdownId === 'java-creator') checkJavaCreatorButton();
+  else if (dropdownId === 'java-updater') checkUpdaterButton('java');
+  else if (dropdownId === 'bedrock-creator') checkBedrockCreatorButton();
+  else if (dropdownId === 'bedrock-updater') checkUpdaterButton('bedrock');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-dropdown')) {
+    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.custom-dropdown-trigger').forEach(t => t.classList.remove('open'));
+  }
+});
+
+
+
+function checkForUpdates() {
+  fetchVersions();
+}
+
+// ==================== APP STATE ====================
+const packData={java:{file:null,zip:null,updatedZip:null},bedrock:{file:null,zip:null,updatedZip:null}};
+let javaMcmetaContent='';
+let bedrockManifestContent='';
+let currentRating=0;
+let reviews=JSON.parse(localStorage.getItem('mc_reviews')||'[]');
+
+// ==================== NAVIGATION ====================
+function switchMainTab(tab){
+  document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(tab+'-section').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(btn=>btn.classList.remove('active'));
+  document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='reviews') renderReviews();
+}
+
+function switchEdition(edition){
+  document.querySelectorAll('.edition-tabs .tab-btn').forEach(btn=>btn.classList.remove('active'));
+  document.querySelector('.tab-btn.'+edition).classList.add('active');
+  document.querySelectorAll('.edition-content').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(edition+'-edition').classList.add('active');
+}
+
+function switchSubTool(edition,tool){
+  document.querySelectorAll('#'+edition+'-edition .sub-tool-btn').forEach(btn=>btn.classList.remove('active'));
+  document.getElementById(edition+'-'+tool+'-tab').classList.add('active');
+  document.querySelectorAll('#'+edition+'-edition .sub-tool-section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(edition+'-'+tool).classList.add('active');
+}
+
+// ==================== REVIEWS ====================
+const stars=document.querySelectorAll('.star-rating .star');
+stars.forEach(star=>{
+  star.addEventListener('click',()=>{
+    currentRating=parseInt(star.dataset.value);
+    stars.forEach((s,i)=>{s.classList.toggle('active',i<currentRating);});
+  });
+  star.addEventListener('mouseenter',()=>{
+    const val=parseInt(star.dataset.value);
+    stars.forEach((s,i)=>{s.style.color=i<val?'#fbbf24':'#333';});
+  });
+});
+document.querySelector('.star-rating').addEventListener('mouseleave',()=>{
+  stars.forEach((s,i)=>{s.style.color=i<currentRating?'#fbbf24':'#333';});
+});
+
+function submitReview(){
+  const name=document.getElementById('review-name').value.trim();
+  const text=document.getElementById('review-text').value.trim();
+  if(!name||!text||currentRating===0){alert('Please fill in all fields and select a rating!');return;}
+  const review={id:Date.now(),name:name,text:text,rating:currentRating,time:new Date().toLocaleString()};
+  reviews.unshift(review);
+  localStorage.setItem('mc_reviews',JSON.stringify(reviews));
+  document.getElementById('review-name').value='';
+  document.getElementById('review-text').value='';
+  currentRating=0;
+  stars.forEach(s=>{s.classList.remove('active');s.style.color='#333';});
+  renderReviews();
+  alert('Review submitted successfully!');
+}
+
+function renderReviews(){
+  const list=document.getElementById('reviews-list');
+  if(reviews.length===0){
+    list.innerHTML='<div class="no-reviews"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><p>No reviews yet. Be the first to review!</p></div>';
+    return;
+  }
+  list.innerHTML=reviews.map(r=>{
+    const stars='&#9733;'.repeat(r.rating)+'&#9734;'.repeat(5-r.rating);
+    const initial=r.name.charAt(0).toUpperCase();
+    return `<div class="review-card">
+      <div class="review-header">
+        <div class="review-user">
+          <div class="review-avatar">${initial}</div>
+          <div>
+            <div class="review-name">${escapeHtml(r.name)}</div>
+            <div class="review-time">${r.time}</div>
+          </div>
+        </div>
+        <div class="review-stars">${stars}</div>
+      </div>
+      <div class="review-text">${escapeHtml(r.text)}</div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(text){
+  const div=document.createElement('div');div.textContent=text;return div.innerHTML;
+}
+
+// ==================== FILE HANDLING ====================
+function handleDragOver(e,edition){e.preventDefault();e.stopPropagation();document.getElementById(edition+'-upload-area').classList.add('dragover');}
+function handleDragLeave(e,edition){e.preventDefault();e.stopPropagation();document.getElementById(edition+'-upload-area').classList.remove('dragover');}
+function handleDrop(e,edition){e.preventDefault();e.stopPropagation();document.getElementById(edition+'-upload-area').classList.remove('dragover');if(e.dataTransfer.files.length>0)processFile(e.dataTransfer.files[0],edition);}
+function handleFileSelect(e,edition){if(e.target.files[0])processFile(e.target.files[0],edition);}
+
+async function processFile(file,edition){
+  const validExtensions=edition==='java'?['.zip']:['.zip','.mcpack'];
+  const ext='.'+file.name.split('.').pop().toLowerCase();
+  if(!validExtensions.includes(ext)){alert('Invalid file type! Only '+validExtensions.join(' or ')+' files are allowed.');return;}
+  packData[edition].file=file;
+  document.getElementById(edition+'-file-info').classList.add('show');
+  document.getElementById(edition+'-filename').textContent=file.name;
+  document.getElementById(edition+'-filesize').textContent=formatFileSize(file.size);
+  document.getElementById(edition+'-filetype').textContent=ext.toUpperCase();
+  addLog(edition,'File loaded: '+file.name,'info');
+  try{
+    const zip=await JSZip.loadAsync(file);
+    packData[edition].zip=zip;
+    addLog(edition,'ZIP archive loaded successfully','success');
+    const iconFile=zip.file('pack.png')||zip.file('pack_icon.png');
+    if(iconFile){const iconBlob=await iconFile.async('blob');const iconUrl=URL.createObjectURL(iconBlob);document.getElementById(edition+'-preview').classList.add('show');document.getElementById(edition+'-preview-img').src=iconUrl;}
+    checkUpdaterButton(edition);
+  }catch(err){addLog(edition,'Error loading ZIP: '+err.message,'error');}
+}
+
+function formatFileSize(bytes){if(bytes===0)return'0 Bytes';const k=1024;const sizes=['Bytes','KB','MB','GB'];const i=Math.floor(Math.log(bytes)/Math.log(k));return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+' '+sizes[i];}
+
+function checkJavaCreatorButton(){const version=document.getElementById('java-creator-version').value;const desc=document.getElementById('java-pack-desc').value.trim();document.getElementById('java-create-btn').disabled=!(version&&desc);}
+function checkBedrockCreatorButton(){const version=document.getElementById('bedrock-creator-version').value;const name=document.getElementById('bedrock-pack-name').value.trim();const desc=document.getElementById('bedrock-pack-desc').value.trim();document.getElementById('bedrock-create-btn').disabled=!(version&&name&&desc);}
+function checkUpdaterButton(edition){const version=document.getElementById(edition+'-updater-version').value;document.getElementById(edition+'-update-btn').disabled=!(packData[edition].file&&version);}
+
+document.getElementById('java-creator-version').addEventListener('change',checkJavaCreatorButton);
+document.getElementById('java-pack-desc').addEventListener('input',checkJavaCreatorButton);
+document.getElementById('bedrock-creator-version').addEventListener('change',checkBedrockCreatorButton);
+document.getElementById('bedrock-pack-name').addEventListener('input',checkBedrockCreatorButton);
+document.getElementById('bedrock-pack-desc').addEventListener('input',checkBedrockCreatorButton);
+document.getElementById('java-updater-version').addEventListener('change',()=>checkUpdaterButton('java'));
+document.getElementById('bedrock-updater-version').addEventListener('change',()=>checkUpdaterButton('bedrock'));
+
+function addLog(edition,message,type){
+  const logArea=document.getElementById(edition+'-log');
+  if(!logArea)return;
+  logArea.classList.add('show');
+  const entry=document.createElement('div');
+  entry.className='log-entry '+type;
+  entry.textContent='['+new Date().toLocaleTimeString()+'] '+message;
+  logArea.appendChild(entry);
+  logArea.scrollTop=logArea.scrollHeight;
+}
+
+function updateProgress(edition,percent){
+  document.getElementById(edition+'-progress').style.display='block';
+  document.getElementById(edition+'-progress-fill').style.width=percent+'%';
+  document.getElementById(edition+'-progress-text').textContent=percent+'%';
+}
+
+// ==================== PACK CREATION ====================
+function createJavaMcmeta(){
+  const version=document.getElementById('java-creator-version').value;
+  const desc=document.getElementById('java-pack-desc').value.trim();
+  if(!version||!desc){alert('Please select a version and enter a description!');return;}
+  javaMcmetaContent=JSON.stringify({pack:{pack_format:parseFloat(version),description:desc}},null,2);
+  const preview=document.getElementById('java-code-preview');
+  preview.textContent=javaMcmetaContent;
+  preview.classList.add('show');
+  document.getElementById('java-creator-download').classList.add('show');
+}
+
+function downloadJavaMcmeta(){if(!javaMcmetaContent){alert('Please generate the file first!');return;}saveAs(new Blob([javaMcmetaContent],{type:'application/json'}),'pack.mcmeta');}
+
+function createBedrockManifest(){
+  const version=document.getElementById('bedrock-creator-version').value;
+  const name=document.getElementById('bedrock-pack-name').value.trim();
+  const desc=document.getElementById('bedrock-pack-desc').value.trim();
+  if(!version||!name||!desc){alert('Please fill in all fields!');return;}
+  const versionParts=version.split('.').map(Number);
+  bedrockManifestContent=JSON.stringify({format_version:2,header:{name:name,description:desc,uuid:generateUUID(),version:versionParts,min_engine_version:versionParts},modules:[{type:"resources",uuid:generateUUID(),version:versionParts}]},null,2);
+  const preview=document.getElementById('bedrock-code-preview');
+  preview.textContent=bedrockManifestContent;
+  preview.classList.add('show');
+  document.getElementById('bedrock-creator-download').classList.add('show');
+}
+
+function downloadBedrockManifest(){if(!bedrockManifestContent){alert('Please generate the file first!');return;}saveAs(new Blob([bedrockManifestContent],{type:'application/json'}),'manifest.json');}
+
+// ==================== PACK UPDATER ====================
+async function updatePack(edition){
+  const version=document.getElementById(edition+'-updater-version').value;
+  const zip=packData[edition].zip;
+  if(!zip||!version){alert('Please upload a file and select a version first!');return;}
+  const btn=document.getElementById(edition+'-update-btn');
+  btn.disabled=true;btn.textContent='Processing...';
+  addLog(edition,'Starting pack update for version '+version+'...','info');
+  updateProgress(edition,10);
+  try{
+    const newZip=new JSZip();
+    const files=Object.keys(zip.files);
+    const totalFiles=files.length;
+    let processed=0;
+    for(const filename of files){
+      const file=zip.files[filename];
+      if(file.dir){newZip.folder(filename);}
+      else{
+        const content=await file.async('uint8array');
+        if(edition==='java'&&filename==='pack.mcmeta'){
+          const text=new TextDecoder().decode(content);
+          const data=JSON.parse(text);
+          if(!data.pack)data.pack={};
+          data.pack.pack_format=parseFloat(version);
+          newZip.file(filename,JSON.stringify(data,null,2));
+          addLog(edition,'Updated pack.mcmeta (Format: '+version+')','success');
+        }
+        else if(edition==='bedrock'&&(filename==='manifest.json'||filename.endsWith('/manifest.json'))){
+          const text=new TextDecoder().decode(content);
+          const data=JSON.parse(text);
+          const versionParts=version.split('.').map(Number);
+          if(!data.format_version)data.format_version=2;
+          if(!data.header)data.header={};
+          data.header.min_engine_version=versionParts;
+          data.header.version=versionParts;
+          if(!data.modules)data.modules=[{type:"resources",uuid:generateUUID(),version:versionParts}];
+          newZip.file(filename,JSON.stringify(data,null,2));
+          addLog(edition,'Updated manifest.json (Version: '+version+')','success');
+        }
+        else{newZip.file(filename,content);}
+      }
+      processed++;
+      updateProgress(edition,10+Math.floor((processed/totalFiles)*80));
+    }
+    if(edition==='java'&&!files.includes('pack.mcmeta')){newZip.file('pack.mcmeta',JSON.stringify({pack:{pack_format:parseFloat(version),description:"Updated Texture Pack"}},null,2));addLog(edition,'pack.mcmeta not found, created new one','info');}
+    if(edition==='bedrock'&&!files.some(f=>f.includes('manifest.json'))){const versionParts=version.split('.').map(Number);newZip.file('manifest.json',JSON.stringify({format_version:2,header:{name:"Texture Pack",description:"Updated Bedrock Texture Pack",uuid:generateUUID(),version:versionParts,min_engine_version:versionParts},modules:[{type:"resources",uuid:generateUUID(),version:versionParts}]},null,2));addLog(edition,'manifest.json not found, created new one','info');}
+    packData[edition].updatedZip=newZip;
+    updateProgress(edition,100);
+    addLog(edition,'Pack update complete!','success');
+    document.getElementById(edition+'-updater-download').classList.add('show');
+  }catch(err){addLog(edition,'Error: '+err.message,'error');console.error(err);}
+  finally{btn.disabled=false;btn.textContent='Update Pack';}
+}
+
+async function downloadPack(edition){
+  const newZip=packData[edition].updatedZip;
+  if(!newZip){alert('Please update the pack first!');return;}
+  const originalName=packData[edition].file.name.replace(/\.zip$|\.mcpack$/i,'');
+  const version=document.getElementById(edition+'-updater-version').value;
+  const ext=edition==='bedrock'?'.mcpack':'.zip';
+  const newName=originalName+'_v'+version+ext;
+  addLog(edition,'Generating download: '+newName+'...','info');
+  try{const blob=await newZip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});saveAs(blob,newName);addLog(edition,'Download started: '+newName,'success');}
+  catch(err){addLog(edition,'Download error: '+err.message,'error');}
+}
+
+function generateUUID(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){const r=Math.random()*16|0;const v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});}
+
+// ==================== INIT ====================
+window.addEventListener('DOMContentLoaded', () => {
+  fetchVersions(); // Load versions on page load
+  renderReviews();
+});
+</script>
+</body>
+</html>
